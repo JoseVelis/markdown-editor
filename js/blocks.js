@@ -42,35 +42,68 @@ const processOrderedList = (processor) => (text) => {
 const processListItem = text => `<li class="py-1">${text}</li>`;
 
 // Función de primera clase para procesar bloques de código
+const processCodeBlock = (codeContent) => {
+    // Función interna para resaltar sintaxis básica
+    const highlightSyntax = (code) => {
+        return code
+            // Keywords
+            .replace(/\b(const|let|var|function|return|if|else|for|while)\b/g, 
+                '<span class="token keyword">$1</span>')
+            // Functions
+            .replace(/\b(\w+)\(/g, 
+                '<span class="token function">$1</span>')
+            // Strings
+            .replace(/(['"])(.*?)\1/g, 
+                '<span class="token string">$&</span>')
+            // Numbers
+            .replace(/\b(\d+)\b/g, 
+                '<span class="token number">$1</span>')
+            // Comments
+            .replace(/(\/\/[^\n]*)/g, 
+                '<span class="token comment">$1</span>');
+    };
+
+    // Escapar caracteres HTML
+    const escapeHtml = (text) => {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    };
+
+    // Procesar y resaltar el código
+    const processedCode = highlightSyntax(escapeHtml(codeContent));
+    
+    // Retornar el bloque de código formateado
+    return `<pre class="code-block"><code>${processedCode}</code></pre>`;
+};
+
+// Función para detectar y procesar bloques de código
 const processCodeBlocks = (text) => {
+    const codeBlockRegex = /```([\s\S]*?)```/g;
+    return text.replace(codeBlockRegex, (match, code) => {
+        return processCodeBlock(code.trim());
+    });
+};
+
+// Función principal para procesar todo el contenido
+const processContent = (text) => {
     let inCodeBlock = false;
     let codeContent = [];
     const lines = text.split('\n');
     const result = [];
 
-    const wrapCodeBlock = (code) => {
-        return `<pre class="bg-gray-800 rounded-lg p-4 my-4 overflow-x-auto">
-            <code class="text-sm font-mono text-gray-200">${code}</code>
-        </pre>`;
-    };
-
     lines.forEach(line => {
         if (line.trim() === '```') {
             if (inCodeBlock) {
                 // Cerrar bloque de código
-                result.push(wrapCodeBlock(codeContent.join('\n')));
+                result.push(processCodeBlock(codeContent.join('\n')));
                 codeContent = [];
             }
             inCodeBlock = !inCodeBlock;
         } else {
             if (inCodeBlock) {
-                // Escapar caracteres HTML y preservar espacios
-                const escapedLine = line
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/ /g, '&nbsp;');
-                codeContent.push(escapedLine);
+                codeContent.push(line);
             } else {
                 result.push(line);
             }
@@ -79,7 +112,7 @@ const processCodeBlocks = (text) => {
 
     // Si quedó un bloque abierto, cerrarlo
     if (inCodeBlock && codeContent.length > 0) {
-        result.push(wrapCodeBlock(codeContent.join('\n')));
+        result.push(processCodeBlock(codeContent.join('\n')));
     }
 
     return result.join('\n');
@@ -88,7 +121,7 @@ const processCodeBlocks = (text) => {
 // Función principal para convertir listas
 function convertLists(text) {
     // Primero procesar bloques de código
-    text = processCodeBlocks(text);
+    text = processContent(text);
     // Luego procesar listas ordenadas
     return processOrderedList(processListItem)(text);
 }
@@ -109,3 +142,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Exportar la función para uso en otros archivos
 window.convertLists = convertLists;
+window.processCodeBlocks = processCodeBlocks;

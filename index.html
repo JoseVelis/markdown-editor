@@ -7,15 +7,32 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         /* Estilos para resaltado de código */
+        pre {
+            background-color: #1a1a1a;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
         pre code {
             display: block;
             line-height: 1.5;
             tab-size: 2;
+            color: #e2e8f0;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
         
         pre code::selection {
             background: rgba(255,255,255,0.2);
         }
+
+        /* Resaltado de sintaxis básico */
+        .token.keyword { color: #ff79c6; }
+        .token.function { color: #50fa7b; }
+        .token.string { color: #f1fa8c; }
+        .token.number { color: #bd93f9; }
+        .token.comment { color: #6272a4; }
     </style>
   </head>
   <body

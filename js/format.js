@@ -120,6 +120,10 @@ function formatTextToCursiveOrBold(text) {
   }
   
   function convertToHtml(text) {
+    // Primero procesar bloques de código
+    text = processCodeBlocks(text);
+    
+    // Luego aplicar otros formatos
     let html = text;
     html = convertHeadings(html);
     html = convertBold(html);
