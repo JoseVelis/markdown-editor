@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MarkDownEditor</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Estilos para resaltado de código */
+        pre code {
+            display: block;
+            line-height: 1.5;
+            tab-size: 2;
+        }
+        
+        pre code::selection {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-gray-100"
+  >
+    <header class="fixed top-0 left-0 right-0 z-10 backdrop-blur-md bg-black/30 border-b border-white/10">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+            Markdown Editor
+          </h1>
+          <div class="space-x-4">
+            <button
+              id="generate-preview"
+              class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-lg shadow-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none transform hover:scale-105"
+            >
+              Generar Vista Previa
+            </button>
+            <button
+              id="toggle-contrast"
+              class="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-6 py-2 rounded-lg shadow-lg hover:from-amber-600 hover:to-orange-700 transition-all duration-200 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:outline-none transform hover:scale-105"
+            >
+              Contrastar Encabezados
+            </button>
+            <button
+              id="change-bold-or-cursive"
+              class="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-2 rounded-lg shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none transform hover:scale-105"
+            >
+              Cambiar Formato
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 pt-24 pb-8">
+      <article class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[calc(100vh-12rem)]">
+        <section class="rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm bg-white/5">
+          <div class="bg-gray-900/50 px-4 py-2 border-b border-white/10">
+            <h2 class="text-sm font-medium text-gray-400">Editor</h2>
+          </div>
+          <textarea
+            id="editor"
+            class="w-full h-[calc(100%-2.5rem)] p-4 font-mono text-sm resize-none bg-transparent text-gray-100 placeholder-gray-500 focus:outline-none"
+            placeholder="Escribe tu código Markdown aquí..."
+          ></textarea>
+        </section>
+
+        <section 
+          id="preview"
+          class="rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm bg-white/5"
+        >
+          <div class="bg-gray-900/50 px-4 py-2 border-b border-white/10">
+            <h2 class="text-sm font-medium text-gray-400">Vista Previa</h2>
+          </div>
+          <div class="p-6 h-[calc(100%-2.5rem)] overflow-auto prose prose-invert max-w-none">
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 backdrop-blur-md bg-black/30 border-t border-white/10">
+      <div class="container mx-auto px-4 py-3">
+        <p class="text-center text-sm text-gray-400">
+          © 2025 Markdown Editor. 
+        </p>
+      </div>
+    </footer>
+
+    <script src="./js/format.js"></script>
+    <script src="./js/blocks.js"></script>
+    <script src="./js/app.js"></script>
+  </body>
+</html>
