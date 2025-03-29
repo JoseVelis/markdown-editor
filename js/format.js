@@ -174,24 +174,163 @@ function toggleHeadingsContrast() {
     });
 }
 
+// Función para limpiar el editor y la vista previa
+function clearEditor() {
+    // Limpiar el editor
+    markdownInput.value = '';
+    
+    // Limpiar la vista previa
+    previewSection.innerHTML = '<p class="text-gray-400">Vista previa aparecerá aquí...</p>';
+    
+    // Reiniciar estados si es necesario
+    isHighContrast = false;
+    formatState.isBold = true;
+    
+    // Actualizar el botón de formato
+    updateFormatButton();
+}
+
+// Debounce function para optimizar el rendimiento
+const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+};
+
+// Función para contar palabras y caracteres
+function updateWordAndCharCount() {
+    const text = markdownInput.value;
+    const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const charCount = text.length;
+
+    const wordCountElement = document.querySelector('#word-count');
+    const charCountElement = document.querySelector('#char-count');
+
+    if (wordCountElement && charCountElement) {
+        wordCountElement.textContent = `${wordCount} ${wordCount === 1 ? 'palabra' : 'palabras'}`;
+        charCountElement.textContent = `${charCount} ${charCount === 1 ? 'caracter' : 'caracteres'}`;
+    }
+}
+
+// Función para leer archivo de forma asíncrona
+const readFile = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = (event) => resolve(event.target.result);
+        reader.onerror = (error) => reject(error);
+        
+        reader.readAsText(file);
+    });
+};
+
+// Función para mostrar mensaje de carga
+const showLoadingState = () => {
+    markdownInput.value = 'Cargando archivo...';
+    previewSection.innerHTML = '<p class="text-gray-400">Cargando...</p>';
+    markdownInput.disabled = true;
+};
+
+// Función para restaurar estado normal
+const restoreEditorState = () => {
+    markdownInput.disabled = false;
+};
+
+// Función para manejar la carga del archivo
+async function handleFileLoad(event) {
+    const file = event.target.files[0];
+    
+    if (!file) return;
+    
+    if (!file.name.endsWith('.md')) {
+        alert('Por favor, seleccione un archivo Markdown (.md)');
+        return;
+    }
+    
+    try {
+        showLoadingState();
+        
+        const content = await readFile(file);
+        
+        markdownInput.value = content;
+        renderPreview();
+        updateWordAndCharCount();
+        
+    } catch (error) {
+        console.error('Error al leer el archivo:', error);
+        alert('Error al leer el archivo. Por favor, intente nuevamente.');
+        markdownInput.value = '';
+        previewSection.innerHTML = '<p class="text-gray-400">Vista previa aparecerá aquí...</p>';
+    } finally {
+        restoreEditorState();
+    }
+}
+
 // Esperar a que el DOM esté cargado antes de añadir event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    const toggleContrastBtn = document.querySelector('#toggle-contrast');
+    // Crear versión debounced del renderPreview
+    const debouncedRenderPreview = debounce(renderPreview, 300);
+
+    // Escuchar cambios en el editor
+    markdownInput.addEventListener('input', debouncedRenderPreview);
+
+    // Remover el event listener del botón de vista previa ya que no es necesario
     const generatePreviewBtn = document.querySelector('#generate-preview');
+    if (generatePreviewBtn) {
+        generatePreviewBtn.remove();
+    }
+
+    // Resto de event listeners
+    const toggleContrastBtn = document.querySelector('#toggle-contrast');
     const formatButton = document.querySelector('#change-bold-or-cursive');
     
     if (toggleContrastBtn) {
         toggleContrastBtn.addEventListener('click', toggleHeadingsContrast);
     }
-    
-    if (generatePreviewBtn) {
-        generatePreviewBtn.addEventListener('click', () => {
-            getTextFromTextArea(convertToHtml);
-        });
-    }
 
     if (formatButton) {
         formatButton.addEventListener('click', applyFormatToSelection);
         updateFormatButton();
+    }
+
+    // Añadir listener para el botón de limpieza
+    const clearButton = document.querySelector('#clear-editor');
+    if (clearButton) {
+        clearButton.addEventListener('click', () => {
+            if (markdownInput.value.trim()) {
+                if (confirm('¿Estás seguro de que deseas limpiar todo el contenido?')) {
+                    clearEditor();
+                }
+            } else {
+                clearEditor();
+            }
+        });
+    }
+
+    // Crear versión debounced del contador
+    const debouncedCounter = debounce(updateWordAndCharCount, 300);
+
+    // Escuchar cambios en el editor para actualizar contadores
+    markdownInput.addEventListener('input', debouncedCounter);
+
+    // Actualizar contadores inicialmente
+    updateWordAndCharCount();
+
+    // Renderizar vista previa inicial
+    renderPreview();
+
+    // Añadir listener para cargar archivo
+    const fileInput = document.querySelector('#md-file');
+    const loadButton = document.querySelector('#load-file');
+    
+    if (fileInput && loadButton) {
+        loadButton.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileLoad);
     }
 });

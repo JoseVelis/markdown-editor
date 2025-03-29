@@ -63,12 +63,14 @@ const processCodeBlock = (codeContent) => {
                 '<span class="token comment">$1</span>');
     };
 
-    // Escapar caracteres HTML
+    // Escapar caracteres HTML y preservar espacios
     const escapeHtml = (text) => {
         return text
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+            .replace(/>/g, '&gt;')
+            .replace(/ /g, '&nbsp;')
+            .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
     };
 
     // Procesar y resaltar el código
